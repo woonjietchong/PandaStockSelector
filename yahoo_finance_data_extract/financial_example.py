@@ -18,7 +18,12 @@ if __name__ == '__main__':
         
         stock_designated = raw_input("Enter stock you want to analyse: ")
         
-        if stock_designated == "multiple":
+        if stock_designated == "searchdb":
+            
+            klse_df = pandas.read_csv('klse_stocks_25_09_2016.csv')     
+            
+            print klse_df
+            
             #retrive database from text file
         
             number_of_stocks = raw_input("Enter number of stock you want to analyse: ")
@@ -57,6 +62,15 @@ if __name__ == '__main__':
                 #data_ext.all_stock_df.plot(x='Date', y=['Adj Close','20d_ma','50d_ma','Bol_upper','Bol_lower' ])
                 data_ext.all_stock_df.plot(x='Date', y=['Adj Close','20d_ma','Bol_upper','Bol_lower' ])
                 #data_ext.all_stock_df.plot(x='Date', y=['Bol_BW','Bol_BW_200MA' ])
+                
+                print temp_data_set['Adj Close']
+                print temp_data_set['Bol_upper']
+                
+                print "type of temp_data_set['Adj Close'] is " + str( type(temp_data_set['Adj Close']) )
+                print "type of temp_data_set['Bol_upper'] is " + str( type(temp_data_set['Bol_upper']) )
+                
+                print  "temp_data_set['Adj Close'][0] is " + str( temp_data_set['Adj Close'][0] )
+                print  "temp_data_set['Bol_upper'][0] is " + str( temp_data_set['Bol_upper'][0] )             
                 
                 plt.show()
                 
