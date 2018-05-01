@@ -14,8 +14,6 @@ if __name__ == '__main__':
     
         print "-----------Showing plot------------------------"
         
-        
-        
         stock_designated = raw_input("Enter stock you want to analyse: ")
         
         if stock_designated == "searchdb":
@@ -25,8 +23,6 @@ if __name__ == '__main__':
             
             print klse_df
             
-            
-        
             number_of_stocks = klse_df['stock_code']
             
             print number_of_stocks
@@ -38,8 +34,6 @@ if __name__ == '__main__':
                 stocks_array.append( str( klse_df['stock_code'][i] ) )
                 
             print stocks_array
-            
-            
             
             for i in range( number_of_stocks.size ):        
                 try:
@@ -97,7 +91,9 @@ if __name__ == '__main__':
             data_ext.set_multiple_stock_list([stock_designated])
             data_ext.get_hist_data_of_all_target_stocks()
             # convert the date column to date object
-            data_ext.all_stock_df['Date'] =  pandas.to_datetime( data_ext.all_stock_df['Date'])
+            print data_ext.all_stock_df
+            #data_ext.all_stock_df[1] =  pandas.to_datetime( data_ext.all_stock_df[1])
+            data_ext.all_stock_df["Date"] =  pandas.to_datetime( data_ext.all_stock_df["Date"])
             temp_data_set = data_ext.all_stock_df.sort('Date',ascending = True ) #sort to calculate the rolling mean
             
             temp_data_set['20d_ma'] = pandas.rolling_mean(temp_data_set['Adj Close'], window=20)

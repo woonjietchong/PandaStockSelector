@@ -112,7 +112,7 @@ class YFHistDataExtr(object):
         ## take the adjusted close of the data
 
         # Print options
-        self.print_current_processed_stock = 0 # if 1 -enable printing.
+        self.print_current_processed_stock = 1 # if 1 -enable printing.
 
         # Fault check
         self.download_fault = 0
