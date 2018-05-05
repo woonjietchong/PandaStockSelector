@@ -59,7 +59,7 @@ class simpleapp_tk(Tkinter.Tk):
         pagenos = set()
         maxpages = 0
         # output option
-        outfile = None
+        outfile = 'C:\Users\Admin\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\extracted_output.txt'
         outtype = None
         imagewriter = None
         rotation = 0
@@ -166,4 +166,13 @@ if __name__ == "__main__":
 #f.write(text)
 #
 #print("hello")
+    
 
+#regex = [0-9][0-9]/[0-9][0-9]/[0-9][0-9][0-9][0-9] [0-9][0-9][0-9][0-9][A-Z0-9]??[A-Z0-9]?? .* MYR .* .* .* .* .* .*
+#
+# from tika import parser
+# parsedPDF = parser.from_file("C:\Users\Admin\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\securities_equities_300418.pdf")
+# pdf = parsedPDF["content"]
+# f = open('C:\Users\Admin\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\extracted_output.txt','w')
+# f.write(pdf)
+# f.close()
