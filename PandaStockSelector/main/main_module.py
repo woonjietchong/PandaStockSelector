@@ -5,16 +5,15 @@
 # -*- coding: iso-8859-1 -*-
 
 import Tkinter
+from tika import parser
+import re
+import sqlite3
+import csv
 
-import sys
-from pdfminer.pdfdocument import PDFDocument
-from pdfminer.pdfparser import PDFParser
-from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
-from pdfminer.pdfdevice import PDFDevice, TagExtractor
-from pdfminer.pdfpage import PDFPage
-from pdfminer.converter import XMLConverter, HTMLConverter, TextConverter
-from pdfminer.cmapdb import CMapDB
-from pdfminer.layout import LAParams
+#----- Globals variables ----------
+stock_symbols = []
+stock_symbol_reader = None
+conn_closed = False
 
 class simpleapp_tk(Tkinter.Tk):
     def __init__(self,parent):
@@ -49,82 +48,132 @@ class simpleapp_tk(Tkinter.Tk):
         self.entry.selection_range(0, Tkinter.END)
 
     def OnButtonClick(self):
-        # Open a PDF file.
-        #fp = open('securities_equities_300418.pdf', 'rb')
-            
-        # debug option
-        debug = 0
-        # input option
-        password = ''
-        pagenos = set()
-        maxpages = 0
-        # output option
-        outfile = 'C:\Users\Admin\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\extracted_output.txt'
-        outtype = None
-        imagewriter = None
-        rotation = 0
-        layoutmode = 'normal'
-        codec = 'utf-8'
-        scale = 1
-        caching = True
-        laparams = LAParams()
+        parsedPDF = parser.from_file("C:\Users\Admin\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\securities_equities_300418.pdf")
+        parsedContent = parsedPDF["content"]
         
-        pageiterator = 1
-        
-        #
-        PDFDocument.debug = debug
-        PDFParser.debug = debug
-        CMapDB.debug = debug
-        PDFResourceManager.debug = debug
-        PDFPageInterpreter.debug = debug
-        PDFDevice.debug = debug
-        #
-        rsrcmgr = PDFResourceManager(caching=caching)
-        if not outtype:
-            outtype = 'text'
-            if outfile:
-                if outfile.endswith('.htm') or outfile.endswith('.html'):
-                    outtype = 'html'
-                elif outfile.endswith('.xml'):
-                    outtype = 'xml'
-                elif outfile.endswith('.tag'):
-                    outtype = 'tag'
-        if outfile:
-            outfp = file(outfile, 'w')
-        else:
-            outfp = sys.stdout
-        if outtype == 'text':
-            device = TextConverter(rsrcmgr, outfp, codec=codec, laparams=laparams,
-                                   imagewriter=imagewriter)
-        elif outtype == 'xml':
-            device = XMLConverter(rsrcmgr, outfp, codec=codec, laparams=laparams,
-                                  imagewriter=imagewriter)
-        elif outtype == 'html':
-            device = HTMLConverter(rsrcmgr, outfp, codec=codec, scale=scale,
-                                   layoutmode=layoutmode, laparams=laparams,
-                                   imagewriter=imagewriter)
-        elif outtype == 'tag':
-            device = TagExtractor(rsrcmgr, outfp, codec=codec)
-        else:
-            return 0
+        # remove ','
+        translation = {44: None}
+        parsedContent = parsedContent.translate(translation)
 
-        fp = file('securities_equities_300418.pdf', 'rb')
-        interpreter = PDFPageInterpreter(rsrcmgr, device)
-        print("----- start intepreting -------")
-        for page in PDFPage.get_pages(fp, pagenos,
-                                      maxpages=maxpages, password=password,
-                                      caching=caching, check_extractable=True):
-            print("==== page ====="+str(pageiterator))
-            page.rotate = (page.rotate+rotation) % 360
-            interpreter.process_page(page)
-            pageiterator = pageiterator + 1
-            print("=== end of page ====="+str(pageiterator))
-        print("----- end of intepreting -------")
-        fp.close()
-        device.close()
-        outfp.close()
+        outputfile = open('C:\Users\Admin\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\extracted_output.txt','w')
+        outputfile.write(parsedContent)
+        outputfile.close() 
+
+        regexMatches = re.findall(r"([0-9][0-9])/([0-9][0-9])/([0-9][0-9][0-9][0-9]) ([0-9][0-9][0-9][0-9][A-Z0-9]??[A-Z0-9]??) (.*) MYR (.*) (.*) (.*) (.*) (.*) (.*)", parsedContent)#, re.MULTILINE)
+        #regexMatches = re.match(r"([0-9][0-9]/[0-9][0-9]/[0-9][0-9][0-9][0-9]) ([0-9][0-9][0-9][0-9][A-Z0-9]??[A-Z0-9]??) (.*) MYR (.*) (.*) (.*) (.*) (.*) (.*)", parsedContent)
+        print("regexMatches.groups()")        
+        for groupsInRegex in regexMatches:            
+            print("----------")
+            print(groupsInRegex[0])
+            print(groupsInRegex[1])
+            print(groupsInRegex[2])
+            print(groupsInRegex[3])
+            print(groupsInRegex[4])
+            print(groupsInRegex[5])
+            print(groupsInRegex[6])
+            print(groupsInRegex[7])
+            print(groupsInRegex[8])
+            print(groupsInRegex[9])
+            print(groupsInRegex[10])
+            print("----------")
             
-        
+#        print "Starting wj stock db input"
+#        conn = sqlite3.connect('klse_from_bursa.db')
+#        print "after conn connect"
+#        try:
+#            c = conn.cursor()
+#            print "after conn.cursor"
+#    
+#            # Create table
+#            # Database Schema
+#            #   symbol	            TEXT
+#            #   name                TEXT
+#            #   date-YYYY	        INTEGER
+#            #   date-MM             INTEGER
+#            #   date-DD             INTEGER
+#            #   open_price          NUMERIC -> decimal 3, 2
+#            #   high_price          NUMERIC -> decimal 3, 2
+#            #   low_price	        NUMERIC -> decimal 3, 2
+#            #   close_price	        NUMERIC -> decimal 3, 2
+#            #   volume	            INTEGER -> unsigned bigInt
+#            #   value_traded	      INTEGER -> unsigned bigInt
+#            
+#            #c.execute('''CREATE TABLE IF NOT EXISTS stocks (symbol text, date text, price real)''')
+#            c.execute('''CREATE TABLE IF NOT EXISTS stocks (symbol text, name text, date_YYYY integer, date_MM integer, date_DD integer, open_price numeric, high_price numeric, low_price numeric, close_price numeric, volume integer, value_traded integer)''')
+#            print "after CREATE TABLE"
+#            
+#            print "getting finance data from yahoo"
+#            for groupsInRegex in regexMatches:            
+#                print("----------")
+#                current_stock_symbol = iterated_symbol
+#                current_stock_name = current_stock.get_name()               #TEXT
+#                
+#                temp_trade_datetime = current_stock.get_trade_datetime()	#TEXT
+#                  # for future reference : example of get_trade_datetime() are 2017-06-23 20:17:00 UTC+0000
+#                current_stock_date_YYYY	= temp_trade_datetime[0:4]        #INTEGER
+#                current_stock_date_MM = temp_trade_datetime[5:7]            #INTEGER
+#                current_stock_date_DD = temp_trade_datetime[8:10]            #INTEGER
+#                
+#                current_stock_open_price = current_stock.get_open()         #NUMERIC -> decimal 3, 2
+#                print "after get_open"
+#                current_stock_high_price = current_stock.get_days_high()         #NUMERIC -> decimal 3, 2
+#                print "after get_days_high"
+#                current_stock_low_price	= current_stock.get_days_low()        #NUMERIC -> decimal 3, 2
+#                print "after get_days_low"
+#                current_stock_close_price = current_stock.get_price()	        #NUMERIC -> decimal 3, 2
+#                print "after get_price"
+#                current_stock_volume = current_stock.get_volume()	            #INTEGER -> unsigned bigInt
+#                print "after get_volume"
+#                current_stock_value_traded = current_stock.get_value_traded()	            #INTEGER -> unsigned bigInt
+#                print "after get_volume"
+#                
+#                #First
+#                db_query_string = "INSERT INTO stocks VALUES (" + "'" + current_stock_symbol + "'" 
+#                print "after first"
+#                db_query_string = db_query_string + ", " + "'" + current_stock_name + "'"
+#                db_query_string = db_query_string + ", " + current_stock_date_YYYY
+#                db_query_string = db_query_string + ", " + current_stock_date_MM
+#                db_query_string = db_query_string + ", " + current_stock_date_DD                   
+#                db_query_string = db_query_string + ", " + current_stock_open_price
+#                db_query_string = db_query_string + ", " + current_stock_high_price
+#                db_query_string = db_query_string + ", " + current_stock_low_price
+#                db_query_string = db_query_string + ", " + current_stock_close_price
+#                db_query_string = db_query_string + ", " + current_stock_volume
+#                db_query_string = db_query_string + ", " + current_stock_value_traded
+#
+#                #Last                
+#                db_query_string = db_query_string +")"
+#    
+#                print db_query_string
+#                
+#            try:
+#                # Insert a row of data
+#                c.execute(db_query_string)
+#                db_query_success = True
+#            except Exception, e:
+#                print "Query Execution failure"
+#                print e
+#                db_query_success = False
+#                
+#            if(db_query_success):
+#                # Save (commit) the changes
+#                print "Saving changes to database"
+#                conn.commit()
+#                            
+#            
+#        except Exception, e:
+#            #cleanup to prevent database not accessible later
+#            print "General database failure , now cleanup"
+#            print e
+#            conn.close()
+#            conn_closed = True
+#        
+#        # We can also close the connection if we are done with it.
+#        # Just be sure any changes have been committed or they will be lost.
+#        if(not conn_closed):
+#            print "Closing connection"
+#            conn.close()
+
         self.labelVariable.set( self.entryVariable.get()+" (You clicked the button)" )
         self.entry.focus_set()
         self.entry.selection_range(0, Tkinter.END)
