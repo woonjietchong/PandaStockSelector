@@ -43,7 +43,8 @@ class simpleapp_tk(Tkinter.Tk):
         self.entry.selection_range(0, Tkinter.END)
 
     def OnButtonClick(self):
-        parsedPDF = parser.from_file("C:\Users\Admin\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\securities_equities_300418.pdf")
+        parsingfile = self.entryVariable.get()
+        parsedPDF = parser.from_file(parsingfile)#"C:\Users\Admin\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\securities_equities_300418.pdf")
         parsedContent = parsedPDF["content"]
         
         # remove ','
