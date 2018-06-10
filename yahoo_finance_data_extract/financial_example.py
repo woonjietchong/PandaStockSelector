@@ -17,12 +17,12 @@ if __name__ == '__main__':
         
         stock_designated = raw_input("Enter stock you want to analyse: ")
         
-        if stock_designated == "searchdb":
+        if stock_designated != None:#== "searchdb":
             
             #retrive database from text file
             print("---------------- reading database")
             conn = sqlite3.connect('C:\Users\Admin\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\klse_from_bursa_dup.db')
-            query = "SELECT symbol,name,date_YYYY,date_MM,date_DD,open_price,high_price,low_price,close_price,volume,value_traded FROM stocks WHERE symbol = 3301"
+            query = "SELECT symbol,name,date_YYYY,date_MM,date_DD,open_price,high_price,low_price,close_price,volume,value_traded FROM stocks WHERE symbol = " + stock_designated #3301"
  
             klse_df = pandas.read_sql_query(query,conn)
             print("---------------- end of reading database")
@@ -96,7 +96,7 @@ if __name__ == '__main__':
                     
                     print "---------------- pt 4 ----------------"
                     print(temp_data_set)
-                    if temp_data_set['close_price'][0] > temp_data_set['Bol_upper'][0] :
+                    if True:#temp_data_set['close_price'][0] > temp_data_set['Bol_upper'][0] :
                         print "------------------------------------------------------"
                         print "---------found   " + klse_df['name'][i] + " matched-------"
                         temp_data_set.plot(x='Date', y=['close_price','ma20d','Bol_upper','Bol_lower' ])
