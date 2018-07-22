@@ -2,13 +2,16 @@
 """
 Created on Sat Jun  4 09:53:47 2016
 
-@author: Admin
+@author: vertwj
+
+@brief analyze data in database and produce graphs
+
 """
 
-import os, re, sys, time, datetime, copy, shutil
+#import os, re, sys, time, datetime, copy, shutil
 import pandas
 import sqlite3
-from yahoo_finance_historical_data_extract import YFHistDataExtr
+#from yahoo_finance_historical_data_extract import YFHistDataExtr
 import matplotlib.pyplot as plt
  
 if __name__ == '__main__':
