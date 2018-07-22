@@ -80,11 +80,11 @@ class YFHistDataExtr(object):
         self.all_stock_sym_list = ['S58.SI','S68.SI'] ##special character need to be converted
         self.individual_stock_sym = '' #full range fo stocks
         self.date_interval = 10 # the number of dates to retrieve, temp  default to 1 day per interval
-        self.bypass_data_downloading = 0 # bypass the downloading of data --> enable calling from database
-##        self.get_data_fr_database = 0 # if 1, will get data from database.
-##
-##        # Database parametes
-##        self.hist_database_path = r'C:\data\stock_sql_db\stock_hist.db'
+        self.bypass_data_downloading = 1 # bypass the downloading of data --> enable calling from database
+        self.get_data_fr_database = 1 # if 1, will get data from database.
+        
+        # Database parametes
+        self.hist_database_path = r'C:\Users\Admin\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\klse_from_bursa_dup.db'
                                                 
         # URL forming 
         self.hist_quotes_start_url = "http://ichart.yahoo.com/table.csv?s="

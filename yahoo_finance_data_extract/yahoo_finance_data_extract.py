@@ -65,50 +65,10 @@ class YFinanceDataExtr(object):
     def __init__(self):
         """ List of url parameters """
         # Param
-        ## self.target_stocks use mainly for a few stocks.
-        ## it also use when setting the 45 or 50 stocks at a time to url
         self.target_stocks = ['S58.SI','S68.SI'] ##special character need to be converted
         self.full_stocklist_to_retrieve = [] #full range fo stocks
         
-        # for difffernt retrieval, based on the dict available to select the file type
-        # currently have "watcher", "all" where watcher is the selected stocks to watch.
-        self.stock_retrieval_type = 'watcher' 
 
-        ## current data .csv file url formation
-        #header to match the sequence of the formed url
-        self.cur_quotes_parm_headers = ['NAME', 'SYMBOL', 'LATEST_PRICE', 'OPEN', 'CLOSE','VOL',
-                                             'YEAR_HIGH','YEAR_LOW'] #label to be use when downloading.
-                                            
-        # URL forming for price details
-        self.cur_quotes_start_url = "http://download.finance.yahoo.com/d/quotes.csv?s="
-        self.cur_quotes_stock_portion_url = ''
-        self.cur_quotes_stock_portion_additional_url = '.SI'# for adding additonal str to the stock url.
-        self.cur_quotes_property_portion_url = ''
-        self.cur_quotes_property_str = 'nsl1opvkj' #default list of properties to copy.
-        self.cur_quotes_end_url = "&e=.csv"
-        self.cur_quotes_full_url = ''
-
-        # Properties from excel
-        self.enable_form_properties_fr_exceltable = 1
-        self.properties_excel_table = r'C:\pythonuserfiles\yahoo_finance_data_extract\Individual_stock_query_property.xls'
-
-        # Output storage
-        self.cur_quotes_csvfile = r'c:\data\temp\stock_data.csv'
-        self.cur_quotes_df = object()
-
-        ## !!!
-        self.cur_quotes_url_list = [] # store of all the url list being query. For debug.
-
-        # for debug/printing
-        self.store_individual_set_df = []
-        self.__print_url = 0 # for printing the url string
-
-        # input file path
-        # dict based on the file for different type of retrieval
-        self.retrieval_type_input_file_dict  = {
-                                                "all"    : r'C:\pythonuserfiles\yahoo_finance_data_extract\stocklist.csv',
-                                                "watcher": r'c:\data\google_stock_screener.csv'
-                                                }
 
     def set_stock_sym_append_str(self, append_str):
         """ Set additional append str to stock symbol when forming stock url.
