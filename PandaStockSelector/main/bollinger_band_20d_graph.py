@@ -37,14 +37,12 @@ if __name__ == '__main__':
         #Init date array
         klse_df_date_arr = []
         
-        print("---------------- klse_df contains")
+        print("---------------- klse_df contains ---------------------")
         print klse_df
+        print("---------------- end of klse_df contains --------------")
+
         
-        
-        #print klse_df['symbol'].size
-        print klse_df['symbol'].size
-        
-        for i in range( klse_df['symbol'].size ):        
+        for i in range( klse_df['date_YYYY'].size ):        
             try:
                 print "----------------" + klse_df['symbol'][i] + "-- construct date ----------------"
                 print(klse_df['date_YYYY'][i])
@@ -58,31 +56,30 @@ if __name__ == '__main__':
                 print(current_error)
                 
         print klse_df
-        
-        for i in range( 1 ):        
-            try:
-                print "----------------" + klse_df['symbol'][i] + "----------------"
-                klse_df['Date'] =  pandas.to_datetime( klse_df['Date'], errors='raise', dayfirst=False, yearfirst=True)
-                temp_data_set = klse_df.sort('Date',ascending = True ) #sort to calculate the rolling mean
-                
-                temp_data_set['ma20d'] = pandas.rolling_mean(klse_df['close_price'], window=20)
-                temp_data_set['ma50d'] = pandas.rolling_mean(klse_df['close_price'], window=50)
-                temp_data_set['Bol_upper'] = pandas.rolling_mean(klse_df['close_price'], window=20) + 2* pandas.rolling_std(klse_df['close_price'], 20, min_periods=20)
-                temp_data_set['Bol_lower'] = pandas.rolling_mean(klse_df['close_price'], window=20) - 2* pandas.rolling_std(klse_df['close_price'], 20, min_periods=20)
-                temp_data_set['Bol_BW'] = ((klse_df['Bol_upper'] - klse_df['Bol_lower'])/klse_df['ma20d'])*100
-                temp_data_set['Bol_BW_200MA'] = pandas.rolling_mean(klse_df['Bol_BW'], window=50)#cant get the 200 daa
-                temp_data_set['Bol_BW_200MA'] = klse_df['Bol_BW_200MA'].fillna(method='backfill')##?? ,may not be good
-                temp_data_set['exma20d'] = pandas.ewma(klse_df['close_price'], span=20)
-                
-                print(temp_data_set)
-                if True:
-                    temp_data_set.plot(x='Date', y=['close_price','ma20d','Bol_upper','Bol_lower' ])
-                    plt.show()
-            except TypeError as current_error:
-                print "TypeError, skip this stock " + str( klse_df['symbol'][i] + " error: " + str(current_error))
-                continue
-            except KeyError as current_error:
-                print "KeyError, skip this stock" + str( klse_df['symbol'][i] + " error: " + str(current_error))
-                continue
-    
+          
+        try:
+            #print "----------------" + klse_df['symbol'][1] + "----------------"
+            klse_df['Date'] =  pandas.to_datetime( klse_df['Date'], errors='raise', dayfirst=False, yearfirst=True)
+            temp_data_set = klse_df.sort('Date',ascending = True ) #sort to calculate the rolling mean
+            
+            temp_data_set['ma20d'] = pandas.rolling_mean(klse_df['close_price'], window=20)
+            temp_data_set['ma50d'] = pandas.rolling_mean(klse_df['close_price'], window=50)
+            temp_data_set['Bol_upper'] = pandas.rolling_mean(klse_df['close_price'], window=20) + 2* pandas.rolling_std(klse_df['close_price'], 20, min_periods=20)
+            temp_data_set['Bol_lower'] = pandas.rolling_mean(klse_df['close_price'], window=20) - 2* pandas.rolling_std(klse_df['close_price'], 20, min_periods=20)
+            temp_data_set['Bol_BW'] = ((klse_df['Bol_upper'] - klse_df['Bol_lower'])/klse_df['ma20d'])*100
+            temp_data_set['Bol_BW_200MA'] = pandas.rolling_mean(klse_df['Bol_BW'], window=50)#cant get the 200 daa
+            temp_data_set['Bol_BW_200MA'] = klse_df['Bol_BW_200MA'].fillna(method='backfill')##?? ,may not be good
+            temp_data_set['exma20d'] = pandas.ewma(klse_df['close_price'], span=20)
+            
+            print(temp_data_set)
+            if True:
+                temp_data_set.plot(x='Date', y=['close_price','ma20d','Bol_upper','Bol_lower' ])
+                plt.show()
+        except TypeError as current_error:
+            print "TypeError occured"
+            #print "TypeError, skip this stock " + str( klse_df['symbol'][1] + " error: " + str(current_error))
+        except KeyError as current_error:
+            print "KeyError occured"
+            #print "KeyError, skip this stock" + str( klse_df['symbol'][1] + " error: " + str(current_error))
+
     end = raw_input("Enter any key to exit: ")
