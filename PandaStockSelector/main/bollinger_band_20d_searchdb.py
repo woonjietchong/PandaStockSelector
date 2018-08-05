@@ -94,7 +94,7 @@ if __name__ == '__main__':
             
             for i in range( klse_stock_symbol_df['symbol'].size ):        
                 try:
-                    print "----------------" + klse_stock_symbol_df['symbol'][i] + "----------------"
+                    #print "----------------" + klse_stock_symbol_df['symbol'][i] + "----------------"
                     klse_single_stock_df = get_single_stock_db(klse_stock_symbol_df['symbol'][i])
                     
                     #init empty values
@@ -114,11 +114,11 @@ if __name__ == '__main__':
                     temp_data_set['exma20d'] = pandas.ewma(klse_single_stock_df['close_price'], span=20)
             
                     #print(temp_data_set)
-                    print(temp_data_set['close_price'][temp_data_set['symbol'].size - 1])
-                    print(temp_data_set['Bol_upper'][temp_data_set['symbol'].size - 1])
+                    #print(temp_data_set['close_price'][temp_data_set['symbol'].size - 1])
+                    #print(temp_data_set['Bol_upper'][temp_data_set['symbol'].size - 1])
                     if temp_data_set['close_price'][temp_data_set['symbol'].size - 1] > temp_data_set['Bol_upper'][temp_data_set['symbol'].size - 1] :
                         print "------------------------------------------------------"
-                        print "---------found   " + klse_stock_symbol_df['symbol'][i] + " matched-------"
+                        print "---------found   " + temp_data_set['symbol'][0] + " " + temp_data_set['name'][0] + " matched-------"
                         temp_data_set.plot(x='Date', y=['close_price','ma20d','Bol_upper','Bol_lower' ])
                         plt.show()
                         print "--------------------------------------------------------"
