@@ -17,7 +17,7 @@ import matplotlib.pyplot as plt
 db_connected = False
 conn = None
 query = None
-conn_target_path = 'C:\Users\Admin\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\klse_from_bursa_dup.db'
+conn_target_path = 'C:\Users\Admin\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\klse_from_bursa.db'
 
 def connect_to_database():
     global conn
