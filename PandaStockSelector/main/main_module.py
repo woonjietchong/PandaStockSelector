@@ -8,8 +8,10 @@ import sqlite3
 
 if __name__ == "__main__":
         input_file = raw_input("Enter input file: ")
+        print("raw data is in processing")
         parsedPDF = parser.from_file(input_file) #old code ("C:\Users\Admin\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\securities_equities_300418.pdf")
         parsedContent = parsedPDF["content"]
+        
         
         # remove ','
         translation = {44: None}
@@ -32,13 +34,13 @@ if __name__ == "__main__":
             #print(groupsInRegex[10]) #--> Value Traded
             #print("----------")
             
-        print "Starting wj stock db input"
+        print("Starting wj stock db input")
         conn = sqlite3.connect('klse_from_bursa.db')
         conn_closed = False
-        print "after conn connect"
+        print("after conn connect")
         try:
             c = conn.cursor()
-            print "after conn.cursor"
+            print("after conn.cursor")
     
             # Create table
             # Database Schema
@@ -55,7 +57,7 @@ if __name__ == "__main__":
             #   value_traded	      INTEGER -> unsigned bigInt
             
             c.execute('''CREATE TABLE IF NOT EXISTS stocks (symbol text, name text, date_YYYY integer, date_MM integer, date_DD integer, open_price numeric, high_price numeric, low_price numeric, close_price numeric, volume integer, value_traded integer)''')
-            print "after CREATE TABLE"
+            print("after CREATE TABLE")
             
             for groupsInRegex in regexMatches:
                 current_stock_symbol = groupsInRegex[3]                  #TEXT
@@ -67,31 +69,31 @@ if __name__ == "__main__":
                 try:
                     current_stock_open_price = str(float(groupsInRegex[5]))         #NUMERIC -> decimal 3, 2
                 except Exception, e:
-                    print current_stock_name + " conversion failure"
-                    print e
+                    print(current_stock_name + " conversion failure")
+                    print(e)
                     current_stock_open_price = "0.0"
                 
                 try:
                     current_stock_high_price = str(float(groupsInRegex[6]))        #NUMERIC -> decimal 3, 2
                 except Exception, e:
-                    print current_stock_name + " conversion failure"
-                    print e
+                    print(current_stock_name + " conversion failure")
+                    print(e)
                     current_stock_high_price = "0.0"
                     
                 try:
                     current_stock_low_price	= str(float(groupsInRegex[7]))        #NUMERIC -> decimal 3, 2
-                    #print "after get_days_low"
+                    #print("after get_days_low")
                 except Exception, e:
-                    print current_stock_name + " conversion failure"
-                    print e
+                    print(current_stock_name + " conversion failure")
+                    print(e)
                     current_stock_low_price = "0.0"
                     
                 try:
                     current_stock_close_price = str(float(groupsInRegex[8]))	      #NUMERIC -> decimal 3, 2
-                    #print "after get_price"
+                    #print("after get_price")
                 except Exception, e:
-                    print current_stock_name + " conversion failure"
-                    print e
+                    print(current_stock_name + " conversion failure")
+                    print(e)
                     current_stock_close_price = "0.0"
 
                 current_stock_volume = groupsInRegex[9]	           #INTEGER -> unsigned bigInt
@@ -117,24 +119,24 @@ if __name__ == "__main__":
                     # Insert a row of data
                     c.execute(db_query_string)
                 except Exception, e:
-                    print "Query Execution failure"
+                    print("Query Execution failure")
                     print(db_query_string)
-                    print e
+                    print(e)
                     
 
             # Save (commit) the changes
-            print "Saving changes to database"
+            print("Saving changes to database")
             conn.commit()
             
         except Exception, e:
             #cleanup to prevent database not accessible later
-            print "General database failure , now cleanup"
-            print e
+            print("General database failure , now cleanup")
+            print(e)
             conn.close()
             conn_closed = True
         
         # We can also close the connection if we are done with it.
         # Just be sure any changes have been committed or they will be lost.
         if(not conn_closed):
-            print "Closing connection"
+            print("Closing connection")
             conn.close()
