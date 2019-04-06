@@ -164,7 +164,7 @@ if __name__ == '__main__':
                     #print str(temp_data_set['Date'][temp_data_set['symbol'].size - 1])    
     
                     if temp_data_set['symbol'].size > calc_num_of_calculations and \
-                    temp_data_set['close_price'][temp_data_set['symbol'].size - 1] > 0.50 and \
+                    temp_data_set['close_price'][temp_data_set['symbol'].size - 1] > 1.00 and \
                     ((str(temp_data_set['Date'][temp_data_set['symbol'].size - 1]).find(largest_date)) != -1):
                         print "calculating on " + temp_data_set['symbol'][0]
                         print "size = " + str(temp_data_set['symbol'].size)
