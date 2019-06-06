@@ -8,33 +8,17 @@ Created on Sun Jan 13 13:55:48 2019
 
 """
 
-#import os, re, sys, time, datetime, copy, shutil
 import pandas
 import sqlite3
-import matplotlib.pyplot as plt
-import copy
+
+#debug mode
+debug_mode = 0
 
 #database variables
 db_connected = False
 conn = None
 query = None
-conn_target_path = 'C:\Users\Admin\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\klse_from_bursa.db'
-
-highest_uptrend_factor = 0
-highest_uptrending_stock = None
-
-second_highest_uptrend_factor = 0
-second_highest_uptrending_stock = None
-
-third_highest_uptrend_factor = 0
-third_highest_uptrending_stock = None
-
-fourth_highest_uptrend_factor = 0
-fourth_highest_uptrending_stock = None
-
-fifth_highest_uptrend_factor = 0
-fifth_highest_uptrending_stock = None
-
+conn_target_path = r'C:\Users\vertw\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\klse_from_bursa.db'
 
 def connect_to_database():
     global conn
@@ -75,17 +59,9 @@ def add_zero_padding_to_date_in_df(df):
     #print df
     #print("--- add_zero_padding_to_date_in_df---------------- df ends")
     return df
-    
+
 def init_additional_fields_in_df(df):
     df = df.assign(Date="0")
-    df = df.assign(ma20d=df.close_price)
-    df = df.assign(ma50d=df.close_price)
-    df = df.assign(Bol_upper=df.close_price)
-    df = df.assign(Bol_lower=df.close_price)
-    df = df.assign(Bol_BW=0.0)
-    df = df.assign(Bol_BW_200MA=0.0)
-    df = df.assign(exma20d=df.close_price)
-    df = df.assign(exma50d=df.close_price)
     return df
 
 if __name__ == '__main__':
@@ -102,9 +78,7 @@ if __name__ == '__main__':
             connect_to_database()
             stock_symbol_query =  "SELECT DISTINCT symbol FROM stocks"
             klse_stock_symbol_df = pandas.read_sql_query(stock_symbol_query,conn)
-            print("---------------- end of reading database")
 
-            print("---------------- reading database")
             connect_to_database()
             stock_symbol_query =  "SELECT DISTINCT date_YYYY FROM stocks"
             klse_stock_date_YYYY_df = pandas.read_sql_query(stock_symbol_query,conn)
@@ -112,9 +86,7 @@ if __name__ == '__main__':
             for i in range( klse_stock_date_YYYY_df['date_YYYY'].size):
                 if int(klse_stock_date_YYYY_df['date_YYYY'][i]) > largest_date_YYYY:
                     largest_date_YYYY = int(klse_stock_date_YYYY_df['date_YYYY'][i])
-            print("---------------- end of reading database")
 
-            print("---------------- reading database")
             connect_to_database()
             stock_symbol_query =  "SELECT DISTINCT date_MM FROM stocks WHERE date_YYYY = "+str(largest_date_YYYY)+";"
             klse_stock_date_MM_df = pandas.read_sql_query(stock_symbol_query,conn)
@@ -122,9 +94,7 @@ if __name__ == '__main__':
             for i in range( klse_stock_date_MM_df['date_MM'].size):
                 if int(klse_stock_date_MM_df['date_MM'][i]) > largest_date_MM:
                     largest_date_MM = int(klse_stock_date_MM_df['date_MM'][i])
-            print("---------------- end of reading database")
 
-            print("---------------- reading database")
             connect_to_database()
             stock_symbol_query =  "SELECT DISTINCT date_DD FROM stocks WHERE date_YYYY = "+str(largest_date_YYYY)+" AND date_MM = "+str(largest_date_MM)+";"
             klse_stock_date_DD_df = pandas.read_sql_query(stock_symbol_query,conn)
@@ -133,19 +103,29 @@ if __name__ == '__main__':
                 if int(klse_stock_date_DD_df['date_DD'][i]) > largest_date_DD:
                     largest_date_DD = int(klse_stock_date_DD_df['date_DD'][i])
             print("---------------- end of reading database")
-            
-            print "largest_date_YYYY = " + str(largest_date_YYYY)
-            print "largest_date_MM = " + str(largest_date_MM)
-            print "largest_date_DD = " + str(largest_date_DD)
+
+            if debug_mode == 1:
+                print "largest_date_YYYY = " + str(largest_date_YYYY)
+                print "largest_date_MM = " + str(largest_date_MM)
+                print "largest_date_DD = " + str(largest_date_DD)
             largest_date = str(largest_date_YYYY).zfill(4) +"-"+str(largest_date_MM).zfill(2) +"-"+str(largest_date_DD).zfill(2)
             
-            print("---------------- klse_stock_symbol_df contains")
-            print klse_stock_symbol_df
-            print("---------------- klse_stock_symbol_df ends")
+            klse_stock_symbol_df = klse_stock_symbol_df.assign(ma20d=0)
+            klse_stock_symbol_df = klse_stock_symbol_df.assign(ma50d=0)
+            klse_stock_symbol_df = klse_stock_symbol_df.assign(vol5d=0)
+            klse_stock_symbol_df = klse_stock_symbol_df.assign(name="...")
+            klse_stock_symbol_df = klse_stock_symbol_df.assign(uptrendfactor=0.0)
+
+            if debug_mode == 1:
+                print("---------------- klse_stock_symbol_df contains")
+                print(klse_stock_symbol_df)
+                print("---------------- klse_stock_symbol_df ends")
             
-            for i in range( klse_stock_symbol_df['symbol'].size ):        
+            for i in range(klse_stock_symbol_df['symbol'].size ):        
                 try:
-                    #print "----------------" + klse_stock_symbol_df['symbol'][i] + "----------------"
+                    if debug_mode == 1:
+                        print "----------------" + klse_stock_symbol_df['symbol'][i] + "----------------"
+
                     klse_single_stock_df = get_single_stock_db(klse_stock_symbol_df['symbol'][i])
                     
                     #init empty values
@@ -158,10 +138,12 @@ if __name__ == '__main__':
                     calc_num_of_calculations = calc_cycle * calc_day_separation
                     
                     klse_single_stock_df['Date'] =  pandas.to_datetime( klse_single_stock_df['Date'], errors='raise', dayfirst=False, yearfirst=True)
-                    #print klse_single_stock_df['Date'][klse_single_stock_df['symbol'].size - 1]                    
-                    temp_data_set = klse_single_stock_df.sort('Date',ascending = True ) #sort to calculate the rolling mean
-    
-                    #print str(temp_data_set['Date'][temp_data_set['symbol'].size - 1])    
+                    
+                    temp_data_set = klse_single_stock_df.sort_values(by='Date',ascending = True ) #sort to calculate the rolling mean
+
+                    if debug_mode == 1:
+                        print klse_single_stock_df['Date'][klse_single_stock_df['symbol'].size - 1]
+                        print str(temp_data_set['Date'][temp_data_set['symbol'].size - 1])
     
                     if temp_data_set['symbol'].size > calc_num_of_calculations and \
                     temp_data_set['close_price'][temp_data_set['symbol'].size - 1] > 1.00 and \
@@ -176,82 +158,24 @@ if __name__ == '__main__':
                             uptrend_factor_sum = uptrend_factor_sum + uptrend_factor
                         
                         uptrend_factor_avg = uptrend_factor_sum / calc_num_of_calculations
-                        
-                        if uptrend_factor_avg > highest_uptrend_factor:
-                            highest_uptrend_factor = uptrend_factor_avg
-                            highest_uptrending_stock = copy.deepcopy(temp_data_set)
-                            print "found higher uptrend " + str(temp_data_set['symbol'][0]) + str(temp_data_set['name'][0])
-                            print "uptrend_factor_avg = " + str(uptrend_factor_avg)
-                            print "highest_uptrend_factor = " + str(highest_uptrend_factor)
-                        elif uptrend_factor_avg > second_highest_uptrend_factor:
-                            second_highest_uptrend_factor = uptrend_factor_avg
-                            second_highest_uptrending_stock = copy.deepcopy(temp_data_set)
-                            print "found second higher uptrend " + str(temp_data_set['symbol'][0]) + str(temp_data_set['name'][0])
-                            print "uptrend_factor_avg = " + str(uptrend_factor_avg)
-                            print "second_highest_uptrend_factor = " + str(second_highest_uptrend_factor)
-                        elif uptrend_factor_avg > third_highest_uptrend_factor:
-                            third_highest_uptrend_factor = uptrend_factor_avg
-                            third_highest_uptrending_stock = copy.deepcopy(temp_data_set)
-                            print "found third higher uptrend " + str(temp_data_set['symbol'][0]) + str(temp_data_set['name'][0])
-                            print "uptrend_factor_avg = " + str(uptrend_factor_avg)
-                            print "third_highest_uptrend_factor = " + str(third_highest_uptrend_factor)
-                        elif uptrend_factor_avg > fourth_highest_uptrend_factor:
-                            fourth_highest_uptrend_factor = uptrend_factor_avg
-                            fourth_highest_uptrending_stock = copy.deepcopy(temp_data_set)
-                            print "found fourth higher uptrend " + str(temp_data_set['symbol'][0]) + str(temp_data_set['name'][0])
-                            print "uptrend_factor_avg = " + str(uptrend_factor_avg)
-                            print "fourth_highest_uptrend_factor = " + str(fourth_highest_uptrend_factor)
-                        elif uptrend_factor_avg > fifth_highest_uptrend_factor:
-                            fifth_highest_uptrend_factor = uptrend_factor_avg
-                            fifth_highest_uptrending_stock = copy.deepcopy(temp_data_set)
-                            print "found fifth higher uptrend " + str(temp_data_set['symbol'][0]) + str(temp_data_set['name'][0])
-                            print "uptrend_factor_avg = " + str(uptrend_factor_avg)
-                            print "fifth_highest_uptrend_factor = " + str(fifth_highest_uptrend_factor)
-            
-                    #if (temp_data_set['close_price'][temp_data_set['symbol'].size - 1] - temp_data_set['Bol_upper'][temp_data_set['symbol'].size - 1]) > 0.0001 :
-                        #print "------------------------------------------------------"
-                        #print "---------found   " + temp_data_set['symbol'][0] + " " + temp_data_set['name'][0] + " matched-------"
-                        #temp_data_set.plot(x='Date', y=['close_price','ma20d','Bol_upper','Bol_lower' ])
-                        #plt.show()
-                        #print "--------------------------------------------------------"
-                #except TypeError as current_error:
-                    #print "TypeError, skip this stock " + str( klse_stock_symbol_df['symbol'][i] + " error: " + str(current_error))
-                    #continue
-                except KeyError as current_error:
-                    print "KeyError, skip this stock " + str( klse_stock_symbol_df['symbol'][i] + " error: " + str(current_error))
+                        klse_stock_symbol_df['name'][i] = temp_data_set['name'][0]
+                        klse_stock_symbol_df['uptrendfactor'][i] = uptrend_factor_avg
+                except TypeError as current_error:
+                    print "TypeError, skip this stock " + str(current_error)
                     continue
-                #except Exception as e:
-                    #print "searching loop error: " + str(e)
-                    #continue
-        
+                except KeyError as current_error:
+                    print "KeyError, skip this stock " + str(current_error)
+                    continue
+                except Exception as e:
+                    print "searching loop error: " + str(e)
+                    continue
+
+            #Sort and display the highest
+            display_sorted_df = klse_stock_symbol_df.sort_values(by='uptrendfactor',ascending = False ) #sort to show highest uptrends
+            #i = 0
+            print("Sorted highest uptrend: " + str(display_sorted_df))
+            #print(display_sorted_df.iloc[i,:])
+            #i = i+1
+            #print(display_sorted_df.iloc[i,:])
+
         end = raw_input("Enter any key to exit: ")
-        
-        print "-------------highest uptrending -----------------------------------------"
-        print "---------found   " + highest_uptrending_stock['symbol'][0] + " " + highest_uptrending_stock['name'][0] + " matched-------"
-        highest_uptrending_stock.plot(x='Date', y=['close_price'])
-        plt.show()
-        print "--------------------------------------------------------"
-
-        print "-------------second highest uptrending -----------------------------------------"
-        print "---------found   " + second_highest_uptrending_stock['symbol'][0] + " " + second_highest_uptrending_stock['name'][0] + " matched-------"
-        second_highest_uptrending_stock.plot(x='Date', y=['close_price'])
-        plt.show()
-        print "--------------------------------------------------------"
-
-        print "-------------third highest uptrending -----------------------------------------"
-        print "---------found   " + third_highest_uptrending_stock['symbol'][0] + " " + third_highest_uptrending_stock['name'][0] + " matched-------"
-        third_highest_uptrending_stock.plot(x='Date', y=['close_price'])
-        plt.show()
-        print "--------------------------------------------------------"
-
-        print "-------------fourth highest uptrending -----------------------------------------"
-        print "---------found   " + fourth_highest_uptrending_stock['symbol'][0] + " " + fourth_highest_uptrending_stock['name'][0] + " matched-------"
-        fourth_highest_uptrending_stock.plot(x='Date', y=['close_price'])
-        plt.show()
-        print "--------------------------------------------------------"
-
-        print "-------------fifth highest uptrending -----------------------------------------"
-        print "---------found   " + fifth_highest_uptrending_stock['symbol'][0] + " " + fifth_highest_uptrending_stock['name'][0] + " matched-------"
-        fifth_highest_uptrending_stock.plot(x='Date', y=['close_price'])
-        plt.show()
-        print "--------------------------------------------------------"
