@@ -13,11 +13,14 @@ import pandas
 import sqlite3
 import matplotlib.pyplot as plt
 
+#debug mode
+debug_mode = 0
+
 #database variables
 db_connected = False
 conn = None
 query = None
-conn_target_path = 'C:\Users\Admin\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\klse_from_bursa.db'
+conn_target_path = r'C:\Users\vertw\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\klse_from_bursa.db'
 
 def connect_to_database():
     global conn
@@ -102,26 +105,30 @@ if __name__ == '__main__':
                     klse_single_stock_df = add_zero_padding_to_date_in_df(klse_single_stock_df)
                     
                     klse_single_stock_df['Date'] =  pandas.to_datetime( klse_single_stock_df['Date'], errors='raise', dayfirst=False, yearfirst=True)
-                    temp_data_set = klse_single_stock_df.sort('Date',ascending = True ) #sort to calculate the rolling mean
+                    temp_data_set = klse_single_stock_df.sort_values(by='Date',ascending = True ) #sort to calculate the rolling mean
                     
-                    temp_data_set['ma20d'] = pandas.rolling_mean(klse_single_stock_df['close_price'], window=20)
-                    temp_data_set['ma50d'] = pandas.rolling_mean(klse_single_stock_df['close_price'], window=50)
-                    temp_data_set['Bol_upper'] = pandas.rolling_mean(klse_single_stock_df['close_price'], window=20) + 2* pandas.rolling_std(klse_single_stock_df['close_price'], 20, min_periods=20)
-                    temp_data_set['Bol_lower'] = pandas.rolling_mean(klse_single_stock_df['close_price'], window=20) - 2* pandas.rolling_std(klse_single_stock_df['close_price'], 20, min_periods=20)
-                    temp_data_set['Bol_BW'] = ((klse_single_stock_df['Bol_upper'] - klse_single_stock_df['Bol_lower'])/klse_single_stock_df['ma20d'])*100
-                    temp_data_set['Bol_BW_200MA'] = pandas.rolling_mean(klse_single_stock_df['Bol_BW'], window=50)#cant get the 200 daa
-                    temp_data_set['Bol_BW_200MA'] = klse_single_stock_df['Bol_BW_200MA'].fillna(method='backfill')##?? ,may not be good
-                    temp_data_set['exma20d'] = pandas.ewma(klse_single_stock_df['close_price'], span=20)
-            
-                    #print(temp_data_set)
-                    #print(temp_data_set['close_price'][temp_data_set['symbol'].size - 1])
-                    #print(temp_data_set['Bol_upper'][temp_data_set['symbol'].size - 1])
+                    temp_rolling_mean = klse_single_stock_df['close_price'].rolling(window=20).mean()
+                    temp_rolling_std = klse_single_stock_df['close_price'].rolling(window=20, min_periods=20).std()
+                    temp_data_set['ma20d'] = temp_rolling_mean
+                    #temp_data_set['ma50d'] = klse_single_stock_df['close_price'].rolling(window=50).mean()
+                    temp_data_set['Bol_upper'] = temp_rolling_mean + 2*temp_rolling_std
+                    temp_data_set['Bol_lower'] = temp_rolling_mean - 2*temp_rolling_std
+                    #temp_data_set['Bol_BW'] = ((klse_single_stock_df['Bol_upper'] - klse_single_stock_df['Bol_lower'])/klse_single_stock_df['ma20d'])*100
+                    #temp_data_set['Bol_BW_200MA'] = klse_single_stock_df['Bol_BW'].rolling(window=200).mean()
+                    #temp_data_set['Bol_BW_200MA'] = klse_single_stock_df['Bol_BW_200MA'].fillna(method='backfill')##?? ,may not be good
+                    #temp_data_set['exma20d'] = klse_single_stock_df['close_price'].ewm(span=20).mean()
+                    
+                    if debug_mode is 1:
+                        print(temp_data_set)
+                        print(temp_data_set['close_price'][temp_data_set['symbol'].size - 1])
+                        print(temp_data_set['Bol_upper'][temp_data_set['symbol'].size - 1])
+
                     if (temp_data_set['close_price'][temp_data_set['symbol'].size - 1] - temp_data_set['Bol_upper'][temp_data_set['symbol'].size - 1]) > 0.0001 :
-                        print "------------------------------------------------------"
-                        print "---------found   " + temp_data_set['symbol'][0] + " " + temp_data_set['name'][0] + " matched-------"
+                        print "----------------------------------------------------------------------------------------------------"
+                        print "--------- found   " + temp_data_set['symbol'][0] + " " + temp_data_set['name'][0] + " matched-------"
                         temp_data_set.plot(x='Date', y=['close_price','ma20d','Bol_upper','Bol_lower' ])
                         plt.show()
-                        print "--------------------------------------------------------"
+                        print "----------------------------------------------------------------------------------------------------"
                 except TypeError as current_error:
                     print "TypeError, skip this stock " + str( klse_stock_symbol_df['symbol'][i] + " error: " + str(current_error))
                     continue
