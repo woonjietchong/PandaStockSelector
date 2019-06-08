@@ -20,7 +20,7 @@ debug_mode = 0
 db_connected = False
 conn = None
 query = None
-conn_target_path = r'C:\Users\vertw\Desktop\PandaStockSelectorWorkspace\PandaStockSelector\main\klse_from_bursa.db'
+conn_target_path = r'klse_from_bursa.db'
 entire_db_downloaded = 0
 entire_db = None
 
