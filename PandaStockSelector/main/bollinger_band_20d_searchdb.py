@@ -122,6 +122,7 @@ if __name__ == '__main__':
 
                 if (temp_data_set['close_price'][temp_data_set['symbol'].size - 1] - temp_data_set['Bol_upper'][temp_data_set['symbol'].size - 1]) > 0.0001 :
                     print "----------------------------------------------------------------------------------------------------"
+                    print(temp_data_set['Date'][temp_data_set['symbol'].size - 1])
                     print "--------- found   " + temp_data_set['symbol'][0] + " " + temp_data_set['name'][0] + " matched-------"
                     temp_data_set.plot(x='Date', y=['close_price','ma20d','Bol_upper','Bol_lower' ])
                     plt.show()
